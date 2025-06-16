@@ -211,8 +211,7 @@ class EDA:
         # df = pd.read_csv(uploaded)
 
         # 파일 업로드 없이 바로 로컬 CSV를 읽습니다.
-        df = pd.read_csv("population_trends.csv")
-
+        df = pd.read_csv(uploaded)
         # …이어서 탭 생성 및 분석 로직…
 
 
