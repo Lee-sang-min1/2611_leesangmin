@@ -449,6 +449,55 @@ class EDA:
                 > - 극단치의 영향이 완화되어 이후 분석·모델링 안정성이 높아집니다.
                 """)
 
+                # ---------------------
+        # 추가: 지역별 인구 분석 탭
+        # ---------------------
+        st.markdown("---")
+        st.header("📈 지역별 인구 분석 EDA")
+        pop = pd.read_csv("population_trends.csv")
+        pop = pop.rename(columns={"연도":"Year", "지역":"Region", "인구":"Population"})
+        pop_tabs = st.tabs([
+            "1. 품질 체크",
+            "2. 전국 추이",
+            "3. 변화량 순위",
+            "4. 증감률 상위",
+            "5. 누적 영역"
+        ])
+
+        # 1) 품질 체크
+        with pop_tabs[0]:
+            st.write("결측치 개수:", pop.isnull().sum().to_dict())
+            st.write("중복 행 개수:", int(pop.duplicated().sum()))
+
+        # 2) 전국 추이
+        with pop_tabs[1]:
+            total = pop.groupby("Year")["Population"].sum().reset_index()
+            st.line_chart(total.set_index("Year"), height=300)
+
+        # 3) 변화량 순위
+        with pop_tabs[2]:
+            yrs = sorted(pop["Year"].unique())
+            if len(yrs) >= 2:
+                p, l = yrs[-2], yrs[-1]
+                dfp = pop.pivot(index="Region", columns="Year", values="Population")
+                diff = dfp[l] - dfp[p]
+                st.bar_chart(diff.sort_values(ascending=False), height=300)
+            else:
+                st.info("연도 데이터가 2개 이상 필요합니다.")
+
+        # 4) 증감률 상위
+        with pop_tabs[3]:
+            pct = pop.copy()
+            pct["pct_change"] = pct.groupby("Region")["Population"].pct_change() * 100
+            top5 = pct.nlargest(5, "pct_change")[["Region","Year","pct_change"]]
+            st.table(top5.style.format({"pct_change":"{:.2f}%"}))
+
+        # 5) 누적 영역
+        with pop_tabs[4]:
+            area = pop.pivot(index="Year", columns="Region", values="Population").fillna(0)
+            st.area_chart(area, height=300)
+
+
 
 # ---------------------
 # 페이지 객체 생성
