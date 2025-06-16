@@ -206,13 +206,8 @@ class EDA:
         # Bike-Sharing Demand EDA
         # -----------------------
         st.title("📊 Bike-Sharing Demand EDA")
-        uploaded = st.file_uploader("데이터셋 업로드 (train.csv)", type="csv")
-        if not uploaded:
-            st.info("train.csv 파일을 업로드 해주세요.")
-            return
-
-        df = pd.read_csv(uploaded, parse_dates=['datetime'])
-
+        
+        df = pd.read_csv("train.csv", parse_dates=['datetime'])
         tabs = st.tabs([
             "1. 목적 & 절차",
             "2. 데이터셋 설명",
