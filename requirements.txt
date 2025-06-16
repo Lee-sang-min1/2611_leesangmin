@@ -1,6 +1,7 @@
 streamlit
-pyrebase4
 pandas
 numpy
 matplotlib
 seaborn
+pyrebase4
+google-cloud-storage
