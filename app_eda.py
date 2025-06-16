@@ -263,12 +263,30 @@ class EDA:
 
         # D) 증감률 상위 5개
         with tabs[3]:
-            st.header("📈 연도별 인구 증감률 상위 5개")
-            pop["pct_change"] = pop.groupby("Region")["Population"].pct_change() * 100
-            top5 = (pop.dropna(subset=["pct_change"])
-                      .nlargest(5, "pct_change")[["Region","Year","pct_change"]])
-            st.dataframe(top5.style.format({"pct_change":"{:.2f}%"}))
+            st.header("📈 연도별 인구 증감률 상위 5개 (년도별)")
 
+    # 1) 0 → NaN 으로 바꿔서 pct_change 계산 (inf 방지)
+            tmp = pop.copy()
+            tmp["Population"].replace(0, np.nan, inplace=True)
+            tmp["pct_change"] = tmp.groupby("Region")["Population"].pct_change() * 100
+
+    # 2) 연도 목록을 정렬해서 가져오기 (처음 연도는 변화량이 없으므로 제외)
+            years = sorted(tmp["Year"].dt.year.unique())
+            target_years = years[1:]  # 2번째 연도부터 시작
+
+    # 3) 연도별로 탑5 뽑아내기
+            for yr in target_years:
+                st.subheader(f"{yr}년 증감률 상위 5개")
+        # 해당 연도만 뽑아서 pct_change 기준 내림차순 정렬
+                df_yr = tmp[tmp["Year"].dt.year == yr].dropna(subset=["pct_change"])
+                top5 = df_yr.nlargest(5, "pct_change")[["Region", "pct_change"]]
+
+        # % 포맷팅
+                top5["pct_change"] = top5["pct_change"].map(lambda x: f"{x:.2f}%")
+        
+        # 테이블 출력
+                st.table(top5.reset_index(drop=True))
+        
         # E) 누적 영역 그래프
         with tabs[4]:
             st.header("📑 누적 영역 그래프")
