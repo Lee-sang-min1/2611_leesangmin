@@ -40,28 +40,29 @@ if "logged_in" not in st.session_state:
 # ---------------------
 # 홈 페이지 클래스
 # ---------------------
+# ---------------------
+# 홈 페이지 클래스
+# ---------------------
 class Home:
     def __init__(self, login_page, register_page, findpw_page):
         st.title("🏠 Home")
         if st.session_state.get("logged_in"):
             st.success(f"{st.session_state.get('user_email')}님 환영합니다.")
 
-        # Kaggle 데이터셋 출처 및 소개
+        # Population Trends 데이터셋 출처 및 소개
         st.markdown("""
                 ---
-                **Bike Sharing Demand 데이터셋**  
-                - 제공처: [Kaggle Bike Sharing Demand Competition](https://www.kaggle.com/c/bike-sharing-demand)  
-                - 설명: 2011–2012년 캘리포니아 주의 수도인 미국 워싱턴 D.C. 인근 도시에서 시간별 자전거 대여량을 기록한 데이터  
+                **Population Trends 데이터셋**  
+                - 제공처: 통계청 등 공공기관  
+                - 설명: 2008년부터 전국 및 광역자치단체별 인구, 출생아 수, 사망자 수를 연도별로 기록한 데이터  
                 - 주요 변수:  
-                  - `datetime`: 날짜 및 시간  
-                  - `season`: 계절  
-                  - `holiday`: 공휴일 여부  
-                  - `workingday`: 근무일 여부  
-                  - `weather`: 날씨 상태  
-                  - `temp`, `atemp`: 기온 및 체감온도  
-                  - `humidity`, `windspeed`: 습도 및 풍속  
-                  - `casual`, `registered`, `count`: 비등록·등록·전체 대여 횟수  
+                  - `Year`: 연도 (YYYY)  
+                  - `Region`: 지역명 (광역자치단체)  
+                  - `Population`: 연도별 인구 수 (명)  
+                  - `Births`: 해당 연도 출생아 수 (명)  
+                  - `Deaths`: 해당 연도 사망자 수 (명)  
                 """)
+
 
 # ---------------------
 # 로그인 페이지 클래스
