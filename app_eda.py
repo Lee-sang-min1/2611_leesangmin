@@ -210,12 +210,10 @@ class EDA:
         #     return
         # df = pd.read_csv(uploaded)
 
-        # 파일 업로드 없이 바로 로컬 CSV를 읽습니다.
-        df = pd.read_csv(uploaded)
+        # 파일 업로드 없이 바로 로컬 CSV를 읽습니다
         # …이어서 탭 생성 및 분석 로직…
+        df = pd.read_csv("population_trends.csv")
 
-
-        df = pd.read_csv(uploaded, parse_dates=['datetime'])
 
         tabs = st.tabs([
             "1. 목적 & 절차",
