@@ -245,8 +245,9 @@ class EDA:
         # B) 전국 인구 추이
         with tabs[1]:
             st.header("🌐 전국 인구 추이")
-            total = pop.groupby("Year")["Population"].sum()
-            st.line_chart(total)
+            national = pop.loc[pop["Region"] == "전국", ["Year", "Population"]]
+            national = national.set_index("Year")
+            st.line_chart(national["Population"])
 
         # C) 변화량 순위 (최근 2년)
         with tabs[2]:
