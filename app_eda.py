@@ -202,11 +202,19 @@ class Logout:
 # ---------------------
 class EDA:
     def __init__(self):
-        st.title("📊 Bike Sharing Demand EDA")
-        uploaded = st.file_uploader("데이터셋 업로드 (train.csv)", type="csv")
-        if not uploaded:
-            st.info("train.csv 파일을 업로드 해주세요.")
-            return
+        st.title("📊 지역별 인구 분석 EDA")
+        # ↓ 이 부분을 삭제하고 아래 한 줄로 대체하세요.
+        # uploaded = st.file_uploader("파일 업로드 (population_trends.csv)", type="csv")
+        # if not uploaded:
+        #     st.info("population_trends.csv 파일을 업로드 해주세요.")
+        #     return
+        # df = pd.read_csv(uploaded)
+
+        # 파일 업로드 없이 바로 로컬 CSV를 읽습니다.
+        df = pd.read_csv("population_trends.csv")
+
+        # …이어서 탭 생성 및 분석 로직…
+
 
         df = pd.read_csv(uploaded, parse_dates=['datetime'])
 
