@@ -202,156 +202,85 @@ class Logout:
 # ---------------------
 class EDA:
     def __init__(self):
-        # -----------------------
-        # Bike-Sharing Demand EDA
-        # -----------------------
-        st.title("📊 Bike-Sharing Demand EDA")
-        
-        df = pd.read_csv("train.csv", parse_dates=['datetime'])
-        tabs = st.tabs([
-            "1. 목적 & 절차",
-            "2. 데이터셋 설명",
-            "3. 데이터 로드 & 품질 체크",
-            "4. Datetime 특성 추출",
-            "5. 시각화",
-            "6. 상관관계 분석",
-            "7. 이상치 제거",
-            "8. 로그 변환"
-        ])
+        import streamlit as st
+        import pandas as pd
+        import numpy as np
 
-        # 1) 목적 & 분석 절차
-        with tabs[0]:
-            st.header("🔭 목적 & 분석 절차")
-            st.markdown("""
-            **목적**: Bike Sharing Demand 데이터를 탐색하고,
-            다양한 특성이 대여량(count)에 미치는 영향을 파악합니다.
+        # ────────────────────────────────────────────────────
+        # 1) 지역별 인구 분석 EDA
+        # ────────────────────────────────────────────────────
 
-            **절차**:
-            1. 데이터 구조 및 기초 통계 확인  
-            2. 결측치/중복치 등 품질 체크  
-            3. datetime 특성 추출  
-            4. 주요 변수 시각화  
-            5. 변수 간 상관관계 분석  
-            6. 이상치 탐지 및 제거  
-            7. 로그 변환  
-            """)
+        st.title("📊 지역별 인구 분석 EDA")
 
-        # 2) 데이터셋 설명
-        with tabs[1]:
-            st.header("🔍 데이터셋 설명")
-            st.markdown(f"""
-            - **train.csv**: 2011–2012년의 시간대별 자전거 대여 기록  
-            - 관측치 수: {df.shape[0]}개  
-            - 주요 변수: datetime, season, holiday, workingday, weather, temp, atemp, humidity, windspeed, casual, registered, count
-            """)
-            buf = io.StringIO()
-            df.info(buf=buf); st.text(buf.getvalue())
-            st.subheader("기초 통계량"); st.dataframe(df.describe())
-            st.subheader("샘플 데이터"); st.dataframe(df.head())
-
-        # 3) 데이터 로드 & 품질 체크
-        with tabs[2]:
-            st.header("📥 데이터 로드 & 품질 체크")
-            missing = df.isnull().sum(); st.bar_chart(missing)
-            dupes = df.duplicated().sum(); st.write(f"- 중복 행: {dupes}개")
-
-        # 4) Datetime 특성 추출
-        with tabs[3]:
-            st.header("🕒 Datetime 특성 추출")
-            df['year']      = df['datetime'].dt.year
-            df['month']     = df['datetime'].dt.month
-            df['day']       = df['datetime'].dt.day
-            df['hour']      = df['datetime'].dt.hour
-            df['dayofweek'] = df['datetime'].dt.dayofweek
-            st.dataframe(df[['datetime','year','month','day','hour','dayofweek']].head())
-
-        # 5) 시각화
-        with tabs[4]:
-            st.header("📈 시각화")
-            fig1, ax1 = plt.subplots(); sns.pointplot(x='hour', y='count', hue='workingday', data=df, ax=ax1)
-            ax1.set_xlabel("Hour"); ax1.set_ylabel("Count"); st.pyplot(fig1)
-            # (이하 생략—원하시는 차트 그대로 유지)
-
-        # 6) 상관관계 분석
-        with tabs[5]:
-            st.header("🔗 상관관계 분석")
-            cols = ['temp','atemp','casual','registered','humidity','windspeed','count']
-            corr = df[cols].corr()
-            st.dataframe(corr)
-            fig2, ax2 = plt.subplots(figsize=(6,5)); sns.heatmap(corr, annot=True, fmt=".2f", ax=ax2); st.pyplot(fig2)
-
-        # 7) 이상치 제거
-        with tabs[6]:
-            st.header("🚫 이상치 제거")
-            m, s = df['count'].mean(), df['count'].std()
-            thresh = m + 3*s
-            st.write(f"평균={m:.1f}, 표준편차={s:.1f}, 이상치 기준>{thresh:.1f}")
-            df_no = df[df['count'] <= thresh]
-            st.write(f"- 제거 전: {df.shape[0]} / 제거 후: {df_no.shape[0]}")
-
-        # 8) 로그 변환
-        with tabs[7]:
-            st.header("🔄 로그 변환")
-            fig3, axes = plt.subplots(1,2,figsize=(10,4))
-            sns.histplot(df['count'], kde=True, ax=axes[0]); axes[0].set_title("Original")
-            df['log_count'] = np.log1p(df['count'])
-            sns.histplot(df['log_count'], kde=True, ax=axes[1]); axes[1].set_title("Log+1")
-            st.pyplot(fig3)
-
-        # --------------------------------------------
-        # 추가: 지역별 인구 분석 EDA (별도 pop_tabs 정의)
-        # --------------------------------------------
-        st.markdown("---")
-        st.header("📈 지역별 인구 분석 EDA")
-
+        # 로컬에 올려둔 population_trends.csv 파일을 바로 읽어옵니다.
         pop = pd.read_csv("population_trends.csv")
-        pop = pop.rename(columns={"연도":"Year","지역":"Region","인구":"Population"})
 
-        pop_tabs = st.tabs([
-            "9. 품질 체크",
-            "10. 전국 추이",
-            "11. 변화량 순위",
-            "12. 증감률 상위",
-            "13. 누적 영역"
+        # 한글 컬럼명을 영어로 바꿔 줍니다.
+        pop = pop.rename(columns={
+            "연도": "Year",
+            "지역": "Region",
+            "인구": "Population",
+            "출생아수(명)": "Births",
+            "사망자수(명)": "Deaths"
+        })
+
+        # 연도 컬럼을 datetime 타입으로 변환
+        pop["Year"] = pd.to_datetime(pop["Year"], format="%Y")
+
+        # 탭 정의: A~E
+        tabs = st.tabs([
+            "A. 품질 체크",
+            "B. 전국 추이",
+            "C. 변화량 순위",
+            "D. 증감률 상위",
+            "E. 누적 영역"
         ])
 
-        # 9) 품질 체크
-        with pop_tabs[0]:
-            st.subheader("🔍 품질 체크")
-            st.write("결측치:", pop.isnull().sum().to_dict())
-            st.write("중복 행:", int(pop.duplicated().sum()))
+        # A) 품질 체크
+        with tabs[0]:
+            st.header("🔍 품질 체크")
+            st.write("결측치 개수:", pop.isnull().sum().to_dict())
+            st.write("중복 행 개수:", int(pop.duplicated().sum()))
 
-        # 10) 전국 추이
-        with pop_tabs[1]:
-            st.subheader("📈 연도별 전국 인구 추이")
-            tot = pop.groupby("Year")["Population"].sum().reset_index().set_index("Year")
-            st.line_chart(tot, height=300)
+        # B) 전국 인구 추이
+        with tabs[1]:
+            st.header("🌐 전국 인구 추이")
+            total = pop.groupby("Year")["Population"].sum()
+            st.line_chart(total)
 
-        # 11) 변화량 순위
-        with pop_tabs[2]:
-            st.subheader("📊 변화량 순위 (직전 vs 최종)")
-            yrs = sorted(pop["Year"].unique())
-            if len(yrs)>=2:
-                p, l = yrs[-2], yrs[-1]
-                piv = pop.pivot(index="Region",columns="Year",values="Population")
-                d = (piv[l]-piv[p]).sort_values(ascending=False)
-                st.bar_chart(d, height=300)
+        # C) 변화량 순위 (최근 2년)
+        with tabs[2]:
+            st.header("📊 최근 2년 인구 변화량 순위")
+            pivot = pop.pivot(index="Region", columns="Year", values="Population")
+            years = sorted(pivot.columns)
+            if len(years) >= 2:
+                diff = pivot[years[-1]] - pivot[years[-2]]
+                st.bar_chart(diff.sort_values(ascending=False) / 1_000,
+                             use_container_width=True)
             else:
-                st.info("연도 데이터 2개 필요")
+                st.info("연도 데이터가 2개 이상 필요합니다.")
 
-        # 12) 증감률 상위
-        with pop_tabs[3]:
-            st.subheader("🏆 증감률 상위 5개 지역")
-            tmp = pop.copy()
-            tmp["pct_change"] = tmp.groupby("Region")["Population"].pct_change()*100
-            top5 = tmp.nlargest(5,"pct_change")[["Region","Year","pct_change"]]
-            st.table(top5.style.format({"pct_change":"{:.2f}%"}))
+        # D) 증감률 상위 5개
+        with tabs[3]:
+            st.header("📈 연도별 인구 증감률 상위 5개")
+            pop["pct_change"] = pop.groupby("Region")["Population"].pct_change() * 100
+            top5 = (pop.dropna(subset=["pct_change"])
+                      .nlargest(5, "pct_change")[["Region","Year","pct_change"]])
+            st.dataframe(top5.style.format({"pct_change":"{:.2f}%"}))
 
-        # 13) 누적 영역
-        with pop_tabs[4]:
-            st.subheader("🌐 누적 영역 그래프")
-            ar = pop.pivot(index="Year",columns="Region",values="Population").fillna(0)
-            st.area_chart(ar, height=300)
+        # E) 누적 영역 그래프
+        with tabs[4]:
+            st.header("📑 누적 영역 그래프")
+            area_df = pop.pivot(index="Year", columns="Region", values="Population").fillna(0)
+            st.area_chart(area_df)
+
+# ─────────────────────────────────────────────────────────────────
+# 스크립트 맨 아래에, 페이지 객체 생성/실행
+# ─────────────────────────────────────────────────────────────────
+Page_EDA = st.Page(EDA, title="EDA", icon="📊", url_path="eda")
+selected_page = st.navigation([Page_EDA])
+selected_page.run()
+
 
 
 
