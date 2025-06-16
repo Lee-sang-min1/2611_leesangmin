@@ -213,6 +213,11 @@ class EDA:
         # 파일 업로드 없이 바로 로컬 CSV를 읽습니다
         # …이어서 탭 생성 및 분석 로직…
         df = pd.read_csv("population_trends.csv")
+        df = df.rename(columns={"연도":"Year","지역":"Region","인구":"Population"})
+        # 연도를 datetime 타입으로 변환
+        df["Year"] = pd.to_datetime(df["Year"], format="%Y")
+        # (원한다면) 새 컬럼 datetime 으로 복사
+        df["datetime"] = df["Year"]
 
 
         tabs = st.tabs([
